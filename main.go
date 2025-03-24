@@ -4,10 +4,14 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"qr-generator/validator"
 )
 
 func main() {
 	e := echo.New()
+
+	// Custom validator.
+	e.Validator = validator.NewCustomValidator()
 
 	// Middlewares.
 	e.Use(middleware.CORS())
