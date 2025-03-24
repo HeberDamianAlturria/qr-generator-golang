@@ -18,7 +18,7 @@ func PostGenerateQR(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	qr, err := qrcode.Encode(qrGeneratorRequest.Url, qrcode.Medium, 256)
+	qr, err := qrcode.Encode(qrGeneratorRequest.Url, qrGeneratorRequest.GetLevel(), qrGeneratorRequest.GetSize())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
