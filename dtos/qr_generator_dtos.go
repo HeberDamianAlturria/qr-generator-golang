@@ -45,3 +45,9 @@ func (qr *QRGeneratorRequest) GetSize() int {
 	}
 	return qr.Size
 }
+
+type QRDecoderResponse struct {
+	// Decoded text from QR code.
+	// @example https://example.com
+	DecodedText string `json:"decoded_text"`
+}

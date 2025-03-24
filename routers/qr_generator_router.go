@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"qr-generator/dtos"
 
+	"github.com/caiguanhao/readqr"
 	"github.com/labstack/echo/v4"
 	"github.com/skip2/go-qrcode"
-	"github.com/caiguanhao/readqr"
 )
 
 // PostGenerateQR godoc
@@ -40,12 +40,23 @@ func PostGenerateQR(c echo.Context) error {
 	return c.Blob(http.StatusOK, "image/png", qr)
 }
 
+// PostDecodeQR godoc
+//
+//	@Summary		Decode QR code
+//	@Description	Decode QR code from image file
+//	@Tags			QR Generator
+//	@Accept			multipart/form-data
+//	@Produce		json
+//	@Param			file	formData	file					true	"Image file"
+//	@Success		200		{object}	dtos.QRDecoderResponse	"OK"
+//	@Failure		400		{string}	string					"Bad Request"
+//	@Router			/qr/decode [post]
 func PostDecodeQR(c echo.Context) error {
-	file, err := c.FormFile("qrImage")
+	file, err := c.FormFile("file")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	
+
 	src, err := file.Open()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
@@ -57,9 +68,7 @@ func PostDecodeQR(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"qr_content": code,
-	})
+	return c.JSON(http.StatusOK, dtos.QRDecoderResponse{DecodedText: code})
 }
 
 func AddQRGeneratorRoutes(e *echo.Echo) {
