@@ -1,12 +1,13 @@
 package routers
 
 import (
-	"net/http"
-	"qr-generator/dtos"
-
 	"github.com/caiguanhao/readqr"
 	"github.com/labstack/echo/v4"
 	"github.com/skip2/go-qrcode"
+	"net/http"
+	"path/filepath"
+	"qr-generator/dtos"
+	"strings"
 )
 
 // PostGenerateQR godoc
@@ -25,16 +26,16 @@ func PostGenerateQR(c echo.Context) error {
 	var qrGeneratorRequest dtos.QRGeneratorRequest
 
 	if err := c.Bind(&qrGeneratorRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, dtos.ErrorResponse{Message: "Bad Request", Details: err.Error()})
 	}
 
 	if err := c.Validate(qrGeneratorRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, dtos.ErrorResponse{Message: "Bad Request", Details: err.Error()})
 	}
 
 	qr, err := qrcode.Encode(qrGeneratorRequest.Url, qrGeneratorRequest.GetLevel(), qrGeneratorRequest.GetSize())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{Message: "Internal Server Error", Details: err.Error()})
 	}
 
 	return c.Blob(http.StatusOK, "image/png", qr)
@@ -57,15 +58,23 @@ func PostDecodeQR(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
+	filename := file.Filename
+
+	if !strings.HasSuffix(filename, ".png") {
+		extension := filepath.Ext(filename)
+
+		return c.JSON(http.StatusBadRequest, dtos.ErrorResponse{Message: "Only PNG file is supported", Details: "File extension is " + extension + " instead of .png"})
+	}
+
 	src, err := file.Open()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, dtos.ErrorResponse{Message: "Bad Request", Details: err.Error()})
 	}
 	defer src.Close()
 
 	code, err := readqr.Decode(src)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, dtos.ErrorResponse{Message: "Bad Request", Details: err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, dtos.QRDecoderResponse{DecodedText: code})
