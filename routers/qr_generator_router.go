@@ -1,10 +1,12 @@
 package routers
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/skip2/go-qrcode"
 	"net/http"
 	"qr-generator/dtos"
+
+	"github.com/labstack/echo/v4"
+	"github.com/skip2/go-qrcode"
+	"github.com/caiguanhao/readqr"
 )
 
 // PostGenerateQR godoc
@@ -38,7 +40,30 @@ func PostGenerateQR(c echo.Context) error {
 	return c.Blob(http.StatusOK, "image/png", qr)
 }
 
+func PostDecodeQR(c echo.Context) error {
+	file, err := c.FormFile("qrImage")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	defer src.Close()
+
+	code, err := readqr.Decode(src)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"qr_content": code,
+	})
+}
+
 func AddQRGeneratorRoutes(e *echo.Echo) {
 	qrGroup := e.Group("/qr")
 	qrGroup.POST("/generate", PostGenerateQR)
+	qrGroup.POST("/decode", PostDecodeQR)
 }
