@@ -4,10 +4,24 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
+// QRGeneratorRequest represents the request body for generating QR code.
+// @description QR Generator Request
 type QRGeneratorRequest struct {
-	Url   string `json:"url" validate:"required"`
+	// URL to be encoded into QR code.
+	// @required
+	// @example https://example.com
+	Url string `json:"url" validate:"required"`
+
+	// Level of error correction used for QR code.
+	// @example Low
+	// @example Medium
+	// @example High
+	// @example Highest
 	Level string `json:"level" validate:"omitempty,oneof=Low Medium High Highest"`
-	Size  int    `json:"size" validate:"omitempty,gte=256,lte=4096"`
+
+	// Size of QR code.
+	// @example 256
+	Size int `json:"size" validate:"omitempty,gte=256,lte=4096"`
 }
 
 func (qr *QRGeneratorRequest) GetLevel() qrcode.RecoveryLevel {
