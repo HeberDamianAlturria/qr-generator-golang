@@ -10,7 +10,7 @@ type QRGeneratorRequest struct {
 	// URL to be encoded into QR code.
 	// @required
 	// @example https://example.com
-	Url string `json:"url" validate:"required"`
+	Url string `json:"url" validate:"required,url"`
 
 	// Level of error correction used for QR code.
 	// @example Low
